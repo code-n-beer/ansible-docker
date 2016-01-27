@@ -8,12 +8,16 @@ This role is for installing Docker.
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+Ansible 2.0
+
+For testing with Vagrant:
+
+Virtualbox 5.0+
+Vagrant 1.7.4+
 
 Role Variables
 --------------
-
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+In development.
 
 Dependencies
 ------------
@@ -26,6 +30,11 @@ Example Playbook
     - hosts: all
       roles:
          - code-n-beer.ansible-docker
+
+Testing
+--------
+
+Run `vagrant up`. To see what it does, read `Vagrantfile` and `tests/vagrant.yml`.
 
 License
 -------
