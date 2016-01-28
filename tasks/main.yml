@@ -8,9 +8,6 @@
   apt_key: keyserver="hkp://pgp.mit.edu:80" id="58118E89F3A912897C070ADBF76221572C52609D"
   when: docker_primary_apt_key_fetch|failed
 
-- name: Ensure apt-transport-https is installed
-  apt: name=apt-transport-https state=present
-
 - name: Ensure docker apt repository is in sources
   apt_repository: repo="deb https://apt.dockerproject.org/repo debian-jessie main" state=present
 
@@ -20,22 +17,25 @@
 - name: Verify apt is pulling from the right repository
   command: apt-cache policy docker-engine
 
-- name: Ensure python-setuptools are installed
-  apt: name=python-setuptools state=present
-
-- name: Ensure python-pip is installed
-  easy_install: name=pip state=present
-
-- name: Ensure virtualenv is installed
-  pip: name=virtualenv state=present
-
 - name: Check if Docker is installed
   shell: docker version
   register: docker_installed
   ignore_errors: true
 
-- name: Install Docker (and update cache AGAIN)
-  apt: name=docker-engine update_cache=yes
+- name: Ensure dependencies are installed
+  apt: name={{ item }} state=present
+  with_items:
+    - apt-transport-https
+    - python-setuptools
+
+- name: Install Docker engine
+  apt: name=docker-engine
+
+- name: Ensure python-pip is installed
+  easy_install: name=pip state=present
+
+- name: Ensure virtualenv is installed
+  pip: name=virtualenv state=present 
 
 - name: Ensure docker-py is installed
   pip: name=docker-py state=present
