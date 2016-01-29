@@ -1,4 +1,8 @@
 ---
+- name: Check kernel version
+  shell: uname -r
+  register: kernel_version_check
+
 - name: Install Docker apt-key
   apt_key: keyserver="hkp://p80.pool.sks-keyservers.net:80" id="58118E89F3A912897C070ADBF76221572C52609D"
   register: docker_primary_apt_key_fetch
@@ -9,10 +13,17 @@
   when: docker_primary_apt_key_fetch|failed
 
 - name: Ensure docker apt repository is in sources
-  apt_repository: repo="deb https://apt.dockerproject.org/repo debian-jessie main" state=present
+  apt_repository: 
+    repo: >
+      "deb https://apt.dockerproject.org/repo {{ ansible_distribution|lower }}-{{ ansible_distribution_release }} main"
+    state: present
 
 - name: Update apt repositories
   apt: update_cache=yes
+
+- name: Purge the old docker repo if it exists
+  apt: name=lxc-docker purge=yes
+  ignore_errors: true
 
 - name: Verify apt is pulling from the right repository
   command: apt-cache policy docker-engine
@@ -22,11 +33,15 @@
   register: docker_installed
   ignore_errors: true
 
+- name: Output kernel version
+  debug: var=kernel_version_check.stdout
+
 - name: Ensure dependencies are installed
   apt: name={{ item }} state=present
   with_items:
     - apt-transport-https
     - python-setuptools
+    - "linux-image-extra-{{ kernel_version_check.stdout }}"
 
 - name: Install Docker engine
   apt: name=docker-engine
